@@ -1,53 +1,62 @@
-"use client"
-
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
+import { useState } from "react";
+import { useTheme } from "@heroui/use-theme"; // ou qualquer hook de tema que você tenha
+import { useNavigate } from 'react-router-dom';
+import { 
+  BadgeCheck, 
+  Bell, 
+  ChevronsUpDown, 
+  CreditCard, 
   LogOut,
-  Sparkles,
-} from "lucide-react"
+  Moon,
+  Sun,
+  Sparkles 
+} from "lucide-react";
+import { 
+  Avatar, 
+  AvatarFallback, 
+  AvatarImage 
+} from "@/components/ui/avatar";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuGroup, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { 
+  SidebarMenu, 
+  SidebarMenuButton, 
+  SidebarMenuItem, 
+  useSidebar 
+} from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/authContext";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar"
+export function NavUser() {
+  const { isMobile } = useSidebar();
+  const { user, setUser } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+  
+  const themeIcon = theme === "light" ? <Sun size={20} /> : <Moon size={20} />;
+  
+  const handleThemeToggle = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
-  const { isMobile } = useSidebar()
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate('/login')
+  };
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
+            <SidebarMenuButton 
+              size="lg" 
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
@@ -61,10 +70,11 @@ export function NavUser({
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
+          
+          <DropdownMenuContent 
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" 
+            side={isMobile ? "bottom" : "right"} 
+            align="end" 
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
@@ -79,36 +89,26 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator /> 
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
+                <BadgeCheck /> Conta
+              </DropdownMenuItem> 
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
+            
+            <DropdownMenuItem onClick={handleThemeToggle}>
+              {themeIcon}
+              Alternar Tema
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut /> Sair 
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }
+

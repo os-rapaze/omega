@@ -19,7 +19,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const payload = { sub: user._id, name: user.name };
+      const payload = { sub: user._id, name: user.name , email: user.email};
 
     return {
       access_token: await this.jwtService.signAsync(payload),
@@ -33,7 +33,7 @@ export class AuthService {
     }
 
     const user = await this.usersService.create(createUserDto);
-    const payload = { sub: user._id, name: user.name };
+    const payload = { sub: user._id, name: user.name, email: user.email };
     return { access_token: await this.jwtService.signAsync(payload) };
   }
 }

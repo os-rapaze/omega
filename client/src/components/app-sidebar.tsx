@@ -9,6 +9,11 @@ import {
   Map,
   PieChart,
   Settings2,
+  Mailbox,
+  Kanban,
+  LayoutDashboard,
+  UsersRound,
+  FolderKanban,
   SquareTerminal,
 } from "lucide-react"
 
@@ -24,132 +29,50 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-// This is sample data.
 const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  teams: [
+  teams: [ 
     {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
+      name: "Ômega Corp.",
       logo: Command,
-      plan: "Free",
+      plan: "Alternar Workspace",
     },
-  ],
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
+  ], 
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
+      name: "Painel de Controle",
+      url: "/dashboard",
+      isCollapsible: false,
+      icon: LayoutDashboard,
     },
     {
-      name: "Sales & Marketing",
+      name: "Tarefas",
       url: "#",
-      icon: PieChart,
+      isCollapsible: true,
+      icon: FolderKanban,
+      items: [
+        {
+          name: "testando",
+          url: "/kanban",
+          icon: Kanban,
+        }
+      ],
     },
     {
-      name: "Travel",
+      name: "Equipes",
       url: "#",
-      icon: Map,
+      isCollapsible: false,
+      icon: UsersRound,
+    },
+    {
+      name: "Mensagens",
+      url: "#",
+      isCollapsible: false,
+      icon: Mailbox,
     },
   ],
 }
@@ -161,8 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavProjects items={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

@@ -25,7 +25,7 @@ export class AuthController {
   @Get('validate')
   @UseGuards(AuthGuard)
   validate(@Request() req) {
-    return { user: req.user };
+        return { user: req.user };
   }
 
   @Post('signup')
