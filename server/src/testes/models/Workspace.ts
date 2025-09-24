@@ -1,8 +1,8 @@
 import { Schema, model } from 'mongoose';
 
 const workspaceSchema = new Schema({
-  nomeWorkspace: { type: String, required: true },
-  descricaoWorkspace: { type: String }
+  name: { type: String, required: true },
+  description: { type: String }
 });
 
 export default model('Workspace', workspaceSchema);
