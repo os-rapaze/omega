@@ -5,6 +5,13 @@ import { Projeto, ProjetoDocument } from './projetos.schema';
 import { GithubService } from '../github/github.service';
 import { AiService } from '../ai/ai.service';
 
+interface ProjectData {
+  frontend_language: string;
+  frontend_framework: string;
+  backend_language: string;
+  backend_framework: string;
+}
+
 @Injectable()
 export class ProjetosService {
   constructor(
@@ -51,6 +58,26 @@ export class ProjetosService {
 
     return projeto.save();
   }
+
+  async saveProjectInfo(project_id: string, data: ProjectData) {
+    const projeto = await this.projetosModel.findById(project_id).exec();
+    if (!projeto) {
+      throw new Error('Projeto não encontrado');
+    }
+
+    projeto.frontend = {
+      language: data.frontend_language,
+      framework: data.frontend_framework,
+    };
+
+    projeto.backend = {
+      language: data.backend_language,
+      framework: data.backend_framework,
+    };
+
+    return projeto.save();
+  }
+
   async getProjeto(projetoId: string) {
     return this.projetosModel
       .findById(projetoId)

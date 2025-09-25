@@ -16,6 +16,21 @@ export class Github {
   accessToken: string;
 }
 
+export class Frontend {
+  @Prop({ type: String, required: true })
+  language: string;
+  @Prop({ type: String })
+  framework?: string;
+}
+
+export class Backend {
+  @Prop({ type: String, required: true })
+  language: string;
+
+  @Prop({ type: String })
+  framework?: string;
+}
+
 export type ProjetoDocument = HydratedDocument<Projeto>;
 
 @Schema()
@@ -28,6 +43,12 @@ export class Projeto {
 
   @Prop({ type: Github })
   github: Github;
+
+  @Prop({ type: Frontend })
+  frontend?: Frontend;
+
+  @Prop({ type: Backend })
+  backend?: Backend;
 }
 
 export const ProjetoSchema = SchemaFactory.createForClass(Projeto);
