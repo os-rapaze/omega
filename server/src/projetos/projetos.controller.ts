@@ -2,6 +2,7 @@ import { Controller, Post, Get, Param, Body } from '@nestjs/common';
 import { ProjetosService } from './projetos.service';
 import { GithubService } from '../github/github.service';
 import { AiService } from '../ai/ai.service';
+import { TarefasService } from '../tarefas/tarefas.service';
 
 interface ProjectData {
   frontend_language: string;
@@ -16,6 +17,7 @@ export class ProjetosController {
     private readonly projetosService: ProjetosService,
     private readonly githubService: GithubService,
     private readonly aiService: AiService,
+    private readonly tarefasService: TarefasService,
   ) {}
 
   @Post()
@@ -84,7 +86,7 @@ export class ProjetosController {
 
       return await this.projetosService.saveProjectInfo(
         projetoId,
-        projectDataToSave, // Passa o objeto com os tipos corrigidos
+        projectDataToSave,
       );
     } catch (err: any) {}
   }
@@ -106,6 +108,21 @@ export class ProjetosController {
       projeto.github.repo!,
       projeto.github.accessToken!,
     );
+  }
+
+  @Get(':id/tarefas')
+  async getTarefas(@Param('id') projetoId: string) {
+    const projeto = await this.projetosService.getProjeto(projetoId);
+
+    if (!projeto) {
+      throw new Error('Projeto não encontrado');
+    }
+
+    if (!projeto.github?.connected) {
+      throw new Error('Projeto não está conectado ao GitHub');
+    }
+
+    return this.tarefasService.getTarefas(projetoId);
   }
 
   @Get(':id/commits/:sha')

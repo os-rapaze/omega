@@ -5,6 +5,7 @@ import { ProjetosService } from './projetos.service';
 import { Projeto, ProjetoSchema } from './projetos.schema';
 import { GithubModule } from '../github/github.module';
 import { AiModule } from '../ai/ai.module';
+import { TarefasModule } from '../tarefas/tarefas.module';
 import { GithubService } from '../github/github.service';
 import { AiService } from '../ai/ai.service';
 
@@ -13,6 +14,7 @@ import { AiService } from '../ai/ai.service';
     MongooseModule.forFeature([{ name: Projeto.name, schema: ProjetoSchema }]),
     GithubModule,
     AiModule,
+    TarefasModule,
   ],
   controllers: [ProjetosController],
   providers: [ProjetosService, GithubService, AiService],

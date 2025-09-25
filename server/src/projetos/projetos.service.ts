@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Projeto, ProjetoDocument } from './projetos.schema';
 import { GithubService } from '../github/github.service';
 import { AiService } from '../ai/ai.service';
+import { TarefasService } from '../tarefas/tarefas.service';
 
 interface ProjectData {
   frontend_language: string;
@@ -19,6 +20,7 @@ export class ProjetosService {
     private projetosModel: Model<ProjetoDocument>,
     private readonly githubService: GithubService,
     private readonly aiService: AiService,
+    private readonly tarefasService: TarefasService,
   ) {}
 
   async createProjeto(data: { name: string; workspaceId: string }) {

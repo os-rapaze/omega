@@ -44,7 +44,7 @@ export class AiService {
           },
         ],
         model: 'openai/gpt-oss-20b',
-        response_format: { type: 'json_object' }, // Explicitly request JSON object
+        response_format: { type: 'json_object' },
       });
 
       const rawContent = chatCompletion.choices[0]?.message?.content;
