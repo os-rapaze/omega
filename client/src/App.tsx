@@ -6,6 +6,7 @@ import PricingPage from "@/pages/pricing";
 import BlogPage from "@/pages/blog";
 import AboutPage from "@/pages/about";
 import KanbanPage from "@/pages/kanban";
+import TeamsPage from "@/pages/teams";
 import LoginPage from "@/pages/login";
 import { AuthProvider } from "@/contexts/authContext";
 import SignUpPage from "@/pages/signup";
@@ -18,7 +19,7 @@ function App() {
         <Route path="/" element={<IndexPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
-        
+
         {/* Rotas protegidas */}
         <Route
           path="/dashboard"
@@ -33,6 +34,14 @@ function App() {
           element={
             <ProtectedRoute>
               <KanbanPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teams"
+          element={
+            <ProtectedRoute>
+              <TeamsPage />
             </ProtectedRoute>
           }
         />
@@ -66,4 +75,3 @@ function App() {
 }
 
 export default App;
-

@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from "react";
 import {
   AudioWaveform,
   BookOpen,
@@ -15,19 +15,19 @@ import {
   UsersRound,
   FolderKanban,
   SquareTerminal,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
+import { NavUser } from "@/components/nav-user";
+import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 const data = {
   user: {
@@ -35,13 +35,13 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  teams: [ 
+  teams: [
     {
       name: "Ômega Corp.",
       logo: Command,
       plan: "Alternar Workspace",
     },
-  ], 
+  ],
   projects: [
     {
       name: "Painel de Controle",
@@ -59,12 +59,12 @@ const data = {
           name: "testando",
           url: "/kanban",
           icon: Kanban,
-        }
+        },
       ],
     },
     {
       name: "Equipes",
-      url: "#",
+      url: "/teams",
       isCollapsible: false,
       icon: UsersRound,
     },
@@ -75,7 +75,7 @@ const data = {
       icon: Mailbox,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -91,5 +91,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
