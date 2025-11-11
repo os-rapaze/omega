@@ -189,6 +189,18 @@ export class ProjetosController {
     return this.tarefasService.getTarefas(projetoId);
   }
 
+  @Get(':id/times')
+  @UseGuards(CombinedAuthGuard)
+  async getTimes(@Param('id') projetoId: string) {
+    const projeto = await this.projetosService.getProjeto(projetoId);
+
+    if (!projeto) {
+      throw new Error('Projeto não encontrado');
+    }
+
+    return this.timesService.getTimes(projetoId);
+  }
+
   @Get(':id/commits/:sha')
   async getCommitDetails(
     @Param('id') projetoId: string,

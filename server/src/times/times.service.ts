@@ -1,14 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { Projeto, ProjetoDocument } from '../projetos/projetos.schema';
+import { CreateTimeDto } from './dto/create-time.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types, Model } from 'mongoose';
 import { Time, TimeDocument } from './times.schema';
 
 @Injectable()
 export class TimesService {
-  constructor(@InjectModel(Time.name) private timeModel: Model<TimeDocument>) {}
+  constructor(
+    @InjectModel(Time.name) private timeModel: Model<TimeDocument>,
+    @InjectModel(Projeto.name) private projetoModel: Model<ProjetoDocument>,
+  ) {}
 
-  async create(timeData: Partial<Time>): Promise<TimeDocument> {
-    const createdTime = new this.timeModel(timeData);
+  async create(createTimeDto: CreateTimeDto): Promise<Time> {
+    const projeto = await this.projetoModel
+      .findById(createTimeDto.projetoId)
+      .exec();
+
+    if (!projeto) {
+      throw new BadRequestException('Projeto não encontrado.');
+    }
+
+    const createdTime = new this.timeModel(createTimeDto);
     return createdTime.save();
   }
 
@@ -23,5 +36,12 @@ export class TimesService {
         { new: true },
       )
       .populate('members');
+  }
+
+  async getTime(timeId: string) {
+    return this.timeModel.findById(timeId).populate('projetoId').exec();
+  }
+  async getTimes(projetoId: string): Promise<Time[]> {
+    return this.timeModel.find({ projetoId }).exec();
   }
 }
