@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { CliModule } from './cli/cli.module';
 import { ProjetosModule } from './projetos/projetos.module';
 import { GithubModule } from './github/github.module';
 import { AiModule } from './ai/ai.module';
@@ -29,6 +30,7 @@ import { TarefasModule } from './tarefas/tarefas.module';
     GithubModule,
     AiModule,
     TarefasModule,
+    CliModule,
   ],
   controllers: [AppController],
   providers: [AppService],

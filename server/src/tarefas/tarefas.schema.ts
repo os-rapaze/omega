@@ -29,7 +29,7 @@ export class Tarefa {
   hash: string;
 
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'Projeto' })
-  projetoId: Projeto;
+  projetoId: string;
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }] })
   userIds: User[];

@@ -6,11 +6,12 @@ import {
   HttpStatus,
   Post,
   Request,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { CliLoginDto } from '../dto/cli-login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,10 +23,17 @@ export class AuthController {
     return this.authService.signIn(signInDto.email, signInDto.password);
   }
 
+  @Post('cli/link')
+  async linkCli(@Body() body: CliLoginDto) {
+    const { username, password } = body;
+    const result = await this.authService.linkCli(username, password);
+    return result;
+  }
+
   @Get('validate')
   @UseGuards(AuthGuard)
   validate(@Request() req) {
-        return { user: req.user };
+    return { user: req.user };
   }
 
   @Post('signup')

@@ -47,8 +47,6 @@ export class GithubService {
         additions: file.additions,
         deletions: file.deletions,
         changes: file.changes,
-        raw_url: file.raw_url,
-        blob_url: file.blob_url,
       })),
     };
   }

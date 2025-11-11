@@ -1,8 +1,21 @@
-import { Controller, Post, Get, Param, Body } from '@nestjs/common';
+import {
+  Param,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '../auth/auth.guard';
+import { CombinedAuthGuard } from '../auth/guards/combined-auth.guard';
 import { ProjetosService } from './projetos.service';
 import { GithubService } from '../github/github.service';
 import { AiService } from '../ai/ai.service';
 import { TarefasService } from '../tarefas/tarefas.service';
+import { TimesService } from '../times/times.service';
 
 interface ProjectData {
   frontend_language: string;
@@ -18,6 +31,7 @@ export class ProjetosController {
     private readonly githubService: GithubService,
     private readonly aiService: AiService,
     private readonly tarefasService: TarefasService,
+    private readonly timesService: TimesService,
   ) {}
 
   @Post()
@@ -84,6 +98,55 @@ export class ProjetosController {
         backend_framework: analysisResult.backend_framework ?? '',
       };
 
+      if (analysisResult.frontend_language) {
+        this.timesService.create({ name: 'Frontend', projetoId: projetoId });
+      }
+
+      if (analysisResult.backend_language) {
+        this.timesService.create({ name: 'Backend', projetoId: projetoId });
+      }
+
+      // lógica de analisar usuários, criar times e usuários
+      const allCommits = await this.githubService.getCommits(
+        projeto.github.owner!,
+        projeto.github.repo!,
+        projeto.github.accessToken!,
+      );
+
+      const commitsByAuthor = allCommits.reduce(
+        (acc, commit) => {
+          const author = commit.author;
+          if (!acc[author]) {
+            acc[author] = [];
+          }
+          acc[author].push(commit);
+          return acc;
+        },
+        {} as Record<string, any[]>,
+      );
+
+      const result: Record<string, any[]> = {};
+
+      for (const author in commitsByAuthor) {
+        const authorCommits = commitsByAuthor[author];
+        result[author] = authorCommits.slice(0, 3).map((commit) => commit.sha);
+      }
+
+      for (const author in result) {
+        result[author] = await Promise.all(
+          result[author].map(async (sha) => {
+            return await this.githubService.getCommitDetails(
+              projeto.github.owner!,
+              projeto.github.repo!,
+              sha,
+              projeto.github.accessToken!,
+            );
+          }),
+        );
+      }
+
+      return this.aiService.buildTeamData(result, projetoId);
+
       return await this.projetosService.saveProjectInfo(
         projetoId,
         projectDataToSave,
@@ -111,6 +174,7 @@ export class ProjetosController {
   }
 
   @Get(':id/tarefas')
+  @UseGuards(CombinedAuthGuard)
   async getTarefas(@Param('id') projetoId: string) {
     const projeto = await this.projetosService.getProjeto(projetoId);
 
