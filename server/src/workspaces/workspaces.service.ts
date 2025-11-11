@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -14,8 +14,27 @@ export class WorkspacesService {
   async createWorkspace(data: {
     name: string;
     description?: string;
+    userId?: string;
   }): Promise<Workspace> {
-    const createdWorkspace = new this.workspaceModel(data);
+    // só pode uma workspace por banco, não vai dar de fazer workspace switcher a tempo :(
+    //
+    //
+
+    if (!data?.userId) {
+      throw new BadRequestException('Ocorreu um erro.');
+    }
+
+    const existingWorkspace = await this.workspaceModel.findOne();
+
+    if (existingWorkspace) {
+      throw new BadRequestException('Já existe uma workspace criada.');
+    }
+
+    const createdWorkspace = new this.workspaceModel({
+      name: data.name,
+      description: data.description,
+      owner: data.userId,
+    });
     return createdWorkspace.save();
   }
 

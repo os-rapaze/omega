@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type WorkspaceDocument = HydratedDocument<Workspace>;
 
@@ -10,6 +10,9 @@ export class Workspace {
 
   @Prop()
   description: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  owner: string;
 }
 
 export const WorkspaceSchema = SchemaFactory.createForClass(Workspace);
