@@ -4,10 +4,10 @@ import { SiteHeader } from "~/components/site-header";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { loader } from "./__protected.loader"; // se estiver separado, senão mantenha loader aqui
 
-export { loader }; // importante para manter seu loader funcionando
+export { loader };
 
 export default function ProtectedLayout() {
-  const user = useLoaderData(); // se quiser acessar os dados do usuário validados
+  const user = useLoaderData();
 
   return (
     <div className="[--header-height:calc(--spacing(14))] h-screen">

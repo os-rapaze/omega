@@ -12,7 +12,10 @@ import { cn } from "~/lib/utils.ts";
 
 export function LoginForm({ className, ...props }) {
   const [isVisible, setIsVisible] = React.useState(false);
-  const [formData, setFormData] = React.useState({ email: "", password: "" });
+  const [formData, setFormData] = React.useState({
+    username: "",
+    password: "",
+  });
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 
@@ -58,13 +61,13 @@ export function LoginForm({ className, ...props }) {
           </p>
         </div>
         <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="username">Nome de usuário</FieldLabel>
           <Input
-            name="email"
-            value={formData.email}
+            name="username"
+            value={formData.username}
             onChange={handleInputChange}
-            id="email"
-            type="email"
+            id="username"
+            type="text"
             placeholder="m@example.com"
             required
           />

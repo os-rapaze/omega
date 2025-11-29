@@ -4,8 +4,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 html,
@@ -99,11 +100,11 @@ body {
   --sidebar-accent-foreground: oklch(0.21 0.034 264.665);
   --sidebar-border: oklch(0.928 0.006 264.531);
   --sidebar-ring: oklch(0.707 0.022 261.325);
-  --kanban-board-circle-blue: oklch(0.6232 0.1879 259.80);
+  --kanban-board-circle-blue: oklch(0.6232 0.1879 259.8);
   --kanban-board-circle-cyan: oklch(0.7146 0.1256 215.13);
   --kanban-board-circle-gray: oklch(0.5513 0.0233 264.36);
   --kanban-board-circle-green: oklch(0.7229 0.1921 149.58);
-  --kanban-board-circle-indigo: oklch(0.5860 0.2037 277.12);
+  --kanban-board-circle-indigo: oklch(0.586 0.2037 277.12);
   --kanban-board-circle-pink: oklch(0.6559 0.2117 354.34);
   --kanban-board-circle-purple: oklch(0.6267 0.2325 303.86);
   --kanban-board-circle-red: oklch(0.6368 0.2078 25.33);
@@ -146,13 +147,121 @@ body {
   --kanban-board-circle-blue: oklch(0.7135 0.1435 254.61);
   --kanban-board-circle-cyan: oklch(0.7973 0.1339 211.45);
   --kanban-board-circle-gray: oklch(0.7137 0.0192 261.33);
-  --kanban-board-circle-green: oklch(0.8003 0.1823 151.70);
+  --kanban-board-circle-green: oklch(0.8003 0.1823 151.7);
   --kanban-board-circle-indigo: oklch(0.6797 0.1586 276.96);
   --kanban-board-circle-pink: oklch(0.7253 0.1752 349.74);
   --kanban-board-circle-purple: oklch(0.7218 0.1766 305.51);
-  --kanban-board-circle-red: oklch(0.7108 0.1660 22.21);
+  --kanban-board-circle-red: oklch(0.7108 0.166 22.21);
   --kanban-board-circle-violet: oklch(0.7093 0.1589 293.52);
-  --kanban-board-circle-yellow: oklch(0.8601 0.1730 91.84);
+  --kanban-board-circle-yellow: oklch(0.8601 0.173 91.84);
+}
+
+:root.theme-omega {
+  --background: oklch(0.12 0.02 45);
+  --foreground: oklch(0.95 0.01 45);
+
+  --card: oklch(0.18 0.025 45);
+  --card-foreground: oklch(0.95 0.01 45);
+
+  --primary: oklch(0.65 0.22 45);
+  --primary-foreground: oklch(0.98 0.01 45);
+
+  --secondary: oklch(0.22 0.03 45);
+  --secondary-foreground: oklch(0.95 0.01 45);
+
+  --muted: oklch(0.25 0.03 45);
+  --muted-foreground: oklch(0.65 0.015 45);
+
+  --accent: oklch(0.65 0.22 45);
+  --accent-foreground: oklch(0.98 0.01 45);
+
+  --border: oklch(0.25 0.03 45);
+  --input: oklch(0.22 0.03 45);
+  --ring: oklch(0.65 0.22 45);
+
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+:root.theme-carboneto {
+  --background: oklch(0.12 0.02 270);
+  --foreground: oklch(0.95 0.01 265);
+
+  --card: oklch(0.18 0.025 270);
+  --card-foreground: oklch(0.95 0.01 265);
+
+  --primary: oklch(0.65 0.25 265);
+  --primary-foreground: oklch(0.98 0.01 265);
+
+  --secondary: oklch(0.22 0.03 270);
+  --secondary-foreground: oklch(0.95 0.01 265);
+
+  --muted: oklch(0.25 0.03 270);
+  --muted-foreground: oklch(0.65 0.015 265);
+
+  --accent: oklch(0.65 0.25 265);
+  --accent-foreground: oklch(0.98 0.01 265);
+
+  --border: oklch(0.25 0.03 270);
+  --input: oklch(0.22 0.03 270);
+  --ring: oklch(0.65 0.25 265);
+
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+:root.theme-sobrio {
+  --background: oklch(0.15 0.005 0);
+  --foreground: oklch(0.95 0.005 0);
+
+  --card: oklch(0.2 0.005 0);
+  --card-foreground: oklch(0.95 0.005 0);
+
+  --primary: oklch(0.98 0.005 0);
+  --primary-foreground: oklch(0.15 0.005 0);
+
+  --secondary: oklch(0.25 0.005 0);
+  --secondary-foreground: oklch(0.95 0.005 0);
+
+  --muted: oklch(0.3 0.005 0);
+  --muted-foreground: oklch(0.7 0.005 0);
+
+  --accent: oklch(0.98 0.005 0);
+  --accent-foreground: oklch(0.15 0.005 0);
+
+  --border: oklch(0.3 0.005 0);
+  --input: oklch(0.25 0.005 0);
+  --ring: oklch(0.98 0.005 0);
+
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
 @layer base {
@@ -176,3 +285,4 @@ body {
     --color-kanban-board-circle-yellow: var(--kanban-board-circle-yellow);
   }
 }
+

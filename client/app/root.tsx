@@ -6,11 +6,20 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import { initializeTheme } from "~/composables/useAppearance";
-import { useEffect, useState, useCallback } from "react";
-
-import type { Route } from "./+types/root";
+import axios from "axios";
 import "./app.css";
+import type { Route } from "./+types/root";
+
+import { ThemeProvider } from "~/contexts/theme"; // 👈 novo import
+
+// interceptor axios
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -29,10 +38,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const themeInitScript = `
     (function() {
       try {
-        const stored = localStorage.getItem('appearance');
+        const appearance = localStorage.getItem('appearance');
         const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const isDark = stored === 'dark' || (stored === 'system' && systemDark);
+        const isDark = appearance === 'dark' || (appearance === 'system' && systemDark);
         if (isDark) document.documentElement.classList.add('dark');
+
+        const theme = localStorage.getItem('theme');
+        if (theme) {
+          document.documentElement.classList.add('theme-' + theme);
+        }
       } catch (_) {}
     })();
   `;
@@ -47,7 +61,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
+
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -56,10 +71,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  useEffect(() => {
-    initializeTheme();
-  }, []);
-
   return <Outlet />;
 }
 
