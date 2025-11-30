@@ -38,10 +38,44 @@ export class TimesService {
       .populate('members');
   }
 
+  async assignGithubUser(
+    timeId: string | Types.ObjectId,
+    githubUserId: string | Types.ObjectId,
+  ): Promise<TimeDocument | null> {
+    return await this.timeModel
+      .findByIdAndUpdate(
+        timeId,
+        { $addToSet: { githubMembers: githubUserId } },
+        { new: true },
+      )
+      .populate('githubMembers');
+  }
+
   async getTime(timeId: string) {
     return this.timeModel.findById(timeId).populate('projetoId').exec();
   }
   async getTimes(projetoId: string): Promise<Time[]> {
-    return this.timeModel.find({ projetoId }).exec();
+    return this.timeModel
+      .find({ projetoId })
+      .populate('githubMembers')
+      .populate('members')
+      .exec();
+  }
+
+  async assignUserToGithubUserTeams(
+    githubUserId: string,
+    userId: string,
+  ): Promise<void> {
+    const githubObjectId = new Types.ObjectId(githubUserId);
+    const userObjectId = new Types.ObjectId(userId);
+
+    await this.timeModel.updateMany(
+      {
+        githubMembers: githubObjectId,
+      },
+      {
+        $addToSet: { members: userObjectId },
+      },
+    );
   }
 }

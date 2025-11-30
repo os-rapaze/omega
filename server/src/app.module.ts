@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 
 import { WorkspacesModule } from './workspaces/workspaces.module';
+import { OnboardingModule } from './onboarding/onboarding.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -24,6 +25,7 @@ import { TarefasModule } from './tarefas/tarefas.module';
     }),
 
     AuthModule,
+    OnboardingModule,
     UsersModule,
     WorkspacesModule,
     ProjetosModule,

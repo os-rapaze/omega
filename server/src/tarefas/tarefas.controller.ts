@@ -15,4 +15,9 @@ export class TarefasController {
   async getTarefa(@Param('id') id: string) {
     return this.tarefasService.getTarefa(id);
   }
+
+  @Get('projeto/:projetoId/kanban')
+  async getKanbanByProjeto(@Param('projetoId') projetoId: string) {
+    return this.tarefasService.getKanbanByProjeto(projetoId);
+  }
 }

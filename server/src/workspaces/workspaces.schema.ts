@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
 export type WorkspaceDocument = HydratedDocument<Workspace>;
 
@@ -10,6 +10,9 @@ export class Workspace {
 
   @Prop()
   description: string;
+
+  @Prop()
+  icon: string; // 👈 aqui vai o ícone/capa (base64 / data URL)
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   owner: string;

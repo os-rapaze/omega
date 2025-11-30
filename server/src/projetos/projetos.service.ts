@@ -86,4 +86,8 @@ export class ProjetosService {
       .populate('workspaceId')
       .exec();
   }
+
+  async getProjetos() {
+    return this.projetosModel.find().exec();
+  }
 }

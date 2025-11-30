@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsArray,
 } from 'class-validator';
-import { TarefaType } from '../tarefas.schema';
+import { TarefaStatus } from '../enums/tarefa-status.enum';
 
 export class CreateTarefaDto {
   @IsString()
@@ -24,7 +24,19 @@ export class CreateTarefaDto {
   @IsOptional()
   userIds?: string[];
 
-  @IsEnum(TarefaType)
-  @IsNotEmpty()
-  type: TarefaType;
+  @IsArray()
+  @IsOptional()
+  teamIds?: string[];
+
+  @IsString()
+  @IsOptional()
+  typeId?: string;
+
+  @IsString()
+  @IsOptional()
+  stepId?: string;
+
+  @IsEnum(TarefaStatus)
+  @IsOptional()
+  status?: TarefaStatus = TarefaStatus.TODO;
 }

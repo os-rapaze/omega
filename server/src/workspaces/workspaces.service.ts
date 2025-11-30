@@ -14,6 +14,7 @@ export class WorkspacesService {
   async createWorkspace(data: {
     name: string;
     description?: string;
+    icon?: string;
     userId?: string;
   }): Promise<Workspace> {
     // só pode uma workspace por banco, não vai dar de fazer workspace switcher a tempo :(
@@ -33,6 +34,7 @@ export class WorkspacesService {
     const createdWorkspace = new this.workspaceModel({
       name: data.name,
       description: data.description,
+      icon: data.icon,
       owner: data.userId,
     });
     return createdWorkspace.save();

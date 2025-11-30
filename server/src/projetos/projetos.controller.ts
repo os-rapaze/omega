@@ -39,6 +39,33 @@ export class ProjetosController {
     return this.projetosService.createProjeto(body);
   }
 
+  @Post(':id/link-github-user')
+  async linkGithubToUser(
+    @Body() body: { userId: string; githubUserId: string },
+  ) {
+    await this.githubService.linkGithubUserToUser(
+      body.githubUserId,
+      body.userId,
+    );
+
+    await this.timesService.assignUserToGithubUserTeams(
+      body.githubUserId,
+      body.userId,
+    );
+
+    return { success: true };
+  }
+
+  @Get()
+  async getProjetos() {
+    return this.projetosService.getProjetos();
+  }
+
+  @Get(':id')
+  async getProjeto(@Param('id') id: string) {
+    return this.projetosService.getProjeto(id);
+  }
+
   @Post(':id/connect-github')
   async connectGithub(
     @Param('id') projetoId: string,
@@ -115,11 +142,14 @@ export class ProjetosController {
 
       const commitsByAuthor = allCommits.reduce(
         (acc, commit) => {
-          const author = commit.author;
-          if (!acc[author]) {
-            acc[author] = [];
-          }
-          acc[author].push(commit);
+          const name = commit.author?.name || 'unknown';
+          const email = commit.author?.email || 'unknown';
+
+          const key = `${name}:::${email}`;
+
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(commit);
+
           return acc;
         },
         {} as Record<string, any[]>,
@@ -145,7 +175,7 @@ export class ProjetosController {
         );
       }
 
-      return this.aiService.buildTeamData(result, projetoId);
+      this.aiService.buildTeamData(result, projetoId);
 
       return await this.projetosService.saveProjectInfo(
         projetoId,
@@ -174,7 +204,6 @@ export class ProjetosController {
   }
 
   @Get(':id/tarefas')
-  @UseGuards(CombinedAuthGuard)
   async getTarefas(@Param('id') projetoId: string) {
     const projeto = await this.projetosService.getProjeto(projetoId);
 

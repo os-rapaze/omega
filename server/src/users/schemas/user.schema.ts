@@ -3,7 +3,10 @@ import { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
+@Schema({
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+})
 export class User {
   @Prop()
   name: string;
@@ -19,3 +22,9 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('githubUsers', {
+  ref: 'GithubUser',
+  localField: '_id',
+  foreignField: 'userId',
+});

@@ -2,20 +2,11 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Projeto } from '../projetos/projetos.schema';
 import { User } from '../users/schemas/user.schema';
+import { TarefaStep } from './tarefas-step.schema';
+import { TarefaType } from './tarefas-type.schema';
+import { TarefaStatus } from './enums/tarefa-status.enum';
 
 export type TarefaDocument = HydratedDocument<Tarefa>;
-
-export enum TarefaType {
-  FRONTEND = 'frontend',
-  BACKEND = 'backend',
-}
-
-export enum TarefaStatus {
-  TODO = 'todo',
-  IN_PROGRESS = 'in_progress',
-  DONE = 'done',
-  BLOCKED = 'blocked',
-}
 
 @Schema()
 export class Tarefa {
@@ -29,21 +20,34 @@ export class Tarefa {
   hash: string;
 
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'Projeto' })
-  projetoId: string;
+  projetoId: Projeto;
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }] })
   userIds: User[];
 
-  @Prop({ required: true, type: String, enum: TarefaType })
-  type: TarefaType;
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'TarefaType',
+    required: false,
+  })
+  typeId?: TarefaType;
 
   @Prop({
-    required: true,
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'TarefaStep',
+    required: false,
+  })
+  stepId?: TarefaStep;
+
+  @Prop({
     type: String,
-    enum: TarefaStatus,
+    enum: Object.values(TarefaStatus),
     default: TarefaStatus.TODO,
   })
   status: TarefaStatus;
+
+  @Prop({ required: false })
+  deadlineHours?: number;
 }
 
 export const TarefaSchema = SchemaFactory.createForClass(Tarefa);

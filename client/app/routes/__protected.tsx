@@ -18,8 +18,7 @@ export default function ProtectedLayout() {
           <AppSidebar />
 
           <SidebarInset>
-            {/* Aqui vai o conteúdo da rota filha */}
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-5 p-4 overflow-hidden">
               <Outlet />
             </div>
           </SidebarInset>

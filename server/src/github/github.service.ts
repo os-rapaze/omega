@@ -1,8 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import axios from 'axios';
+import { GithubUser, GithubUserDocument } from './schemas/github-user.schema';
 
 @Injectable()
 export class GithubService {
+  constructor(
+    @InjectModel(GithubUser.name)
+    private githubUserModel: Model<GithubUserDocument>,
+  ) {}
+
   async getCommits(owner: string, repo: string, token: string) {
     const res = await axios.get<any[]>(
       `https://api.github.com/repos/${owner}/${repo}/commits`,
@@ -16,7 +24,7 @@ export class GithubService {
     return res.data.map((commit) => ({
       sha: commit.sha,
       message: commit.commit.message,
-      author: commit.commit.author.name,
+      author: commit.commit.author,
       date: commit.commit.author.date,
     }));
   }
@@ -102,5 +110,18 @@ export class GithubService {
       commitSha: branch.commit.sha,
       protected: branch.protected,
     }));
+  }
+
+  async createUser(userData: Partial<GithubUser>): Promise<GithubUserDocument> {
+    const createdUser = new this.githubUserModel(userData);
+    return createdUser.save();
+  }
+
+  async linkGithubUserToUser(githubUserId: string, userId: string) {
+    return this.githubUserModel.findByIdAndUpdate(
+      githubUserId,
+      { userId },
+      { new: true },
+    );
   }
 }

@@ -4,6 +4,7 @@ import { Types, Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 import { UsersService } from '../users/users.service';
+import { GithubService } from '../github/github.service';
 import { TimesService } from '../times/times.service';
 import { Time, TimeDocument } from '../times/times.schema';
 
@@ -12,6 +13,7 @@ export class AiService {
   constructor(
     private configService: ConfigService,
     private readonly usersService: UsersService,
+    private readonly githubService: GithubService,
     private readonly timesService: TimesService,
     @InjectModel(Time.name) private timeModel: Model<TimeDocument>,
   ) {}
@@ -57,13 +59,17 @@ Ensure the output is a valid JSON string and nothing else.`;
     const originalUsernames = Object.keys(data);
 
     for (let i = 0; i < originalUsernames.length; i++) {
-      const originalName = originalUsernames[i];
-      const username = normalizedUsernames[i];
-      const commits = data[originalName];
+      const key = originalUsernames[i]; // ex.: "João:::joao@gmail.com"
 
-      const user = await this.usersService.create({
-        username,
-        password: 'omega',
+      const [name, email] = key.split(':::');
+
+      const username = normalizedUsernames[i];
+      const commits = data[key];
+
+      const user = await this.githubService.createUser({
+        name,
+        email,
+        projetoId,
       });
 
       try {
@@ -106,14 +112,14 @@ Ensure the output is a valid JSON string and nothing else.`;
           });
 
           if (timeFrontend) {
-            await this.timesService.assignUser(
+            await this.timesService.assignGithubUser(
               timeFrontend._id.toString(),
               user._id.toString(),
             );
           }
 
           if (timeBackend) {
-            await this.timesService.assignUser(
+            await this.timesService.assignGithubUser(
               timeBackend._id.toString(),
               user._id.toString(),
             );
@@ -127,7 +133,7 @@ Ensure the output is a valid JSON string and nothing else.`;
           });
 
           if (timeBackend) {
-            await this.timesService.assignUser(
+            await this.timesService.assignGithubUser(
               timeBackend._id.toString(),
               user._id.toString(),
             );
@@ -139,7 +145,7 @@ Ensure the output is a valid JSON string and nothing else.`;
           });
 
           if (timeFrontend) {
-            await this.timesService.assignUser(
+            await this.timesService.assignGithubUser(
               timeFrontend._id.toString(),
               user._id.toString(),
             );

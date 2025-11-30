@@ -28,6 +28,6 @@ import { Time, TimeSchema } from '../times/times.schema';
     CliModule,
   ],
   controllers: [ProjetosController],
-  providers: [ProjetosService, GithubService, AiService],
+  providers: [ProjetosService],
 })
 export class ProjetosModule {}

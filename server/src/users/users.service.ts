@@ -11,6 +11,10 @@ export class UsersService {
     return this.userModel.findOne({ username }).exec();
   }
 
+  async findOneWithPassword(username: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ username }).select('+password').exec();
+  }
+
   async create(userData: Partial<User>): Promise<UserDocument> {
     const createdUser = new this.userModel(userData);
     return createdUser.save();

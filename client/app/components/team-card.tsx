@@ -66,7 +66,6 @@ export const TeamCard: React.FC<TeamCardProps> = ({
             <div className="grid grid-cols-3 gap-4 text-xs text-gray-400 font-medium mb-3 pb-2 border-b border-gray-700">
               <span>Nome Completo</span>
               <span>Endereço de E-mail</span>
-              <span>Número de Celular</span>
             </div>
 
             <div className="space-y-3">
@@ -88,22 +87,19 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                     </div>
                     <div>
                       <p className="text-white text-sm font-medium">
-                        {member.name}
+                        {member.name ? member.name : "@" + member.username}
                       </p>
                       <p className="text-gray-400 text-xs">
-                        @{member.name.toLowerCase().replace(/\s+/g, "")}
+                        {member.name ? "@" + member.username : ""}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-2 text-gray-300 text-sm">
                     <Mail size={14} className="text-gray-500" />
-                    <span>{member.email}</span>
-                  </div>
-
-                  <div className="flex items-center space-x-2 text-gray-300 text-sm">
-                    <Phone size={14} className="text-gray-500" />
-                    <span>{member.phone}</span>
+                    <span>
+                      {member.email ? member.email : "Sem endereço eletrônico"}
+                    </span>
                   </div>
                 </div>
               ))}
