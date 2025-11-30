@@ -7,7 +7,20 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "~/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import {
+  MoreHorizontal,
+  X,
+  ChevronsUpDown,
+  Columns3,
+  ClipboardList,
+  CheckCircle2,
+  Gauge,
+  Users,
+  Hash,
+  Eye,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useMemo, useState, useRef } from "react";
 import {
   KanbanBoard,
@@ -18,7 +31,7 @@ import {
 } from "~/components/ui/io/kanban";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { api } from "~/lib/api";
-import { useOutletContext } from "react-router";
+import { useOutletContext, useNavigate, useParams } from "react-router";
 import {
   Sheet,
   SheetContent,
@@ -40,7 +53,6 @@ import {
   SelectItem,
 } from "~/components/ui/select";
 import { Checkbox } from "~/components/ui/checkbox";
-
 import {
   Popover,
   PopoverTrigger,
@@ -62,7 +74,11 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { X, ChevronsUpDown } from "lucide-react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "~/components/ui/hover-card";
 
 type ApiTarefa = {
   _id: string;
@@ -99,6 +115,7 @@ type Feature = {
   status: string;
   typeId: string;
   userIds: string[];
+  hash?: string;
   owner?: {
     id: string;
     name: string;
@@ -112,6 +129,7 @@ type ApiMember = {
   name: string;
   username: string;
   email?: string;
+  avatarUrl?: string;
 };
 
 type ApiTime = {
@@ -134,6 +152,9 @@ type TarefaTypeOption = {
 
 const memberId = (m: ApiMember) => m.id ?? m._id;
 
+/* ========================
+   SHEET DE CRIAÇÃO
+======================== */
 const CreateTarefaSheet = ({
   projetoId,
   columns,
@@ -189,8 +210,6 @@ const CreateTarefaSheet = ({
         setLoadingTypes(true);
         const res = await api.get(`/tarefas-tipos/projeto/${projetoId}`);
         const data = res.data;
-
-        console.log("TIPOS DA API:", data);
 
         let normalized: TarefaTypeOption[] = [];
 
@@ -337,6 +356,7 @@ const CreateTarefaSheet = ({
         status: tarefa.status,
         typeId: tarefa.typeId,
         userIds: tarefa.userIds ?? [],
+        hash: tarefa.hash,
         owner: undefined,
       };
 
@@ -352,7 +372,7 @@ const CreateTarefaSheet = ({
 
   const stepOptions = columns; // inclui backlog se você quiser exibir também
 
-  const handleOmegaSubmit = async (e: React.FormEvent) => {
+  const handleOmegaSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!aiPrompt.trim()) return;
 
@@ -394,7 +414,10 @@ const CreateTarefaSheet = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button>Criar tarefa</Button>
+        <Button className="inline-flex items-center gap-2">
+          <ClipboardList className="h-3 w-3" />
+          Criar tarefa
+        </Button>
       </SheetTrigger>
 
       <SheetContent className="flex flex-col">
@@ -410,8 +433,6 @@ const CreateTarefaSheet = ({
           onSubmit={handleSubmit}
           className="flex-1 mt-4 flex flex-col gap-4 overflow-y-auto"
         >
-          {/* BOTÃO DO ÔMEGA */}
-
           {/* NOME */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="name">Nome</Label>
@@ -486,7 +507,7 @@ const CreateTarefaSheet = ({
             </Select>
           </div>
 
-          {/* TIMES - botão que abre dropdown + chips */}
+          {/* TIMES */}
           <div className="flex flex-col gap-2">
             <Label>Times</Label>
 
@@ -563,7 +584,7 @@ const CreateTarefaSheet = ({
             )}
           </div>
 
-          {/* RESPONSÁVEIS - botão + dropdown + chips */}
+          {/* RESPONSÁVEIS */}
           <div className="flex flex-col gap-2">
             <Label>Responsáveis</Label>
 
@@ -736,17 +757,21 @@ const CreateTarefaSheet = ({
   );
 };
 
-// ========================
-// Kanban principal
-// ========================
+/* ========================
+   KANBAN PRINCIPAL
+======================== */
 const Example = () => {
   const [columns, setColumns] = useState<KanbanColumn[]>([]);
   const [features, setFeatures] = useState<Feature[]>([]);
   const [loading, setLoading] = useState(true);
   const [tarefaTypes, setTarefaTypes] = useState<TarefaTypeOption[]>([]);
   const [loadingTypes, setLoadingTypes] = useState(false);
+  const [membersById, setMembersById] = useState<Record<string, ApiMember>>({});
 
   const prevColumnsRef = useRef<Record<string, string>>({});
+
+  const navigate = useNavigate();
+  const { handle } = useParams<{ handle: string }>();
 
   const statusConfig: Record<
     Feature["status"],
@@ -803,7 +828,6 @@ const Example = () => {
 
     api.patch(`/tarefas/${featureId}`, { status: newStatus }).catch((err) => {
       console.error("Erro ao atualizar status da tarefa:", err);
-      // se quiser, pode fazer rollback aqui
     });
   };
 
@@ -813,8 +837,6 @@ const Example = () => {
         f.id === featureId
           ? {
               ...f,
-              // guarda só o id ou mantém o objeto, você escolhe;
-              // aqui vou guardar só o id e usar o label do array de tipos
               typeId: newTypeId as any,
             }
           : f,
@@ -823,7 +845,6 @@ const Example = () => {
 
     api.patch(`/tarefas/${featureId}`, { typeId: newTypeId }).catch((err) => {
       console.error("Erro ao atualizar tipo da tarefa:", err);
-      // idem rollback se quiser
     });
   };
 
@@ -833,16 +854,9 @@ const Example = () => {
     nextFeatures.forEach((feature) => {
       const prevColumn = prevColumns[feature.id];
 
-      // só dispara request se a coluna mudou
       if (prevColumn && prevColumn !== feature.column) {
         const newStepId =
           feature.column === "backlog" ? "backlog" : feature.column;
-
-        console.log("Mudou de coluna", {
-          id: feature.id,
-          prevColumn,
-          newColumn: feature.column,
-        });
 
         api
           .patch(`/tarefas/${feature.id}`, {
@@ -854,15 +868,14 @@ const Example = () => {
       }
     });
 
-    // atualiza o estado local
     setFeatures(nextFeatures);
   };
 
-  // 👉 aqui eu só adicionei o name no tipo
   const { projeto } = useOutletContext<{
     projeto: { _id: string; name?: string };
   }>();
 
+  /* TIPOS DE TAREFA */
   useEffect(() => {
     if (!projeto?._id) return;
 
@@ -904,6 +917,7 @@ const Example = () => {
     fetchTypes();
   }, [projeto._id]);
 
+  /* MAPEADORES DE TIPO */
   const getFeatureTypeId = (feature: Feature): string => {
     const t: any = feature.typeId;
     if (!t) return "";
@@ -921,6 +935,7 @@ const Example = () => {
     return t?.name ?? t?.nome ?? t?.label ?? "";
   };
 
+  /* KANBAN DATA */
   useEffect(() => {
     if (!projeto?._id) return;
 
@@ -947,9 +962,9 @@ const Example = () => {
             description: tarefa.description,
             column: columnId,
             status: tarefa.status,
-            // se o backend manda typeId já certinho, use tarefa.typeId
             typeId: (tarefa as any).typeId ?? (tarefa as any).type,
             userIds: tarefa.userIds ?? [],
+            hash: tarefa.hash,
             owner: undefined,
           }));
         });
@@ -966,10 +981,34 @@ const Example = () => {
     fetchKanban();
   }, [projeto._id]);
 
+  /* MEMBERS PARA AVATAR DOS RESPONSÁVEIS */
+  useEffect(() => {
+    if (!projeto?._id) return;
+
+    const fetchTimes = async () => {
+      try {
+        const res = await api.get<ApiTime[]>(`/projetos/${projeto._id}/times`);
+        const times = res.data ?? [];
+        const map: Record<string, ApiMember> = {};
+
+        times.forEach((time) => {
+          (time.members ?? []).forEach((m) => {
+            map[memberId(m)] = m;
+          });
+        });
+
+        setMembersById(map);
+      } catch (error) {
+        console.error("Erro ao carregar membros para avatares:", error);
+      }
+    };
+
+    fetchTimes();
+  }, [projeto._id]);
+
   // ========= NOVAS INFOS DO HEADER =========
   const totalTasks = features.length;
 
-  // ajuste esse array de status se no backend você usar outro texto
   const doneStatuses = [
     "done",
     "concluida",
@@ -986,6 +1025,26 @@ const Example = () => {
   const completionPercentage =
     totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
+  // métricas por coluna
+  const columnStats = useMemo(() => {
+    const base: Record<string, { total: number; done: number }> = {};
+
+    columns.forEach((c) => {
+      base[c.id] = { total: 0, done: 0 };
+    });
+
+    features.forEach((f) => {
+      const stats = base[f.column] ?? { total: 0, done: 0 };
+      stats.total += 1;
+      if (f.status && doneStatuses.includes(f.status.toLowerCase())) {
+        stats.done += 1;
+      }
+      base[f.column] = stats;
+    });
+
+    return base;
+  }, [columns, features]);
+
   if (loading) {
     return <div>Carregando kanban...</div>;
   }
@@ -997,7 +1056,7 @@ const Example = () => {
   return (
     <div className="flex-1 flex flex-col gap-4 overflow-hidden">
       {/* HEADER MAIS RICO */}
-      <div className="flex items-center justify-between gap-6">
+      <div className="flex items-center justify-between gap-6 px-2 pt-2">
         <div className="flex flex-col gap-1 min-w-0">
           <h1 className="text-xl md:text-2xl font-semibold truncate">
             Visualizando tarefas de:{" "}
@@ -1006,11 +1065,25 @@ const Example = () => {
             </span>
           </h1>
 
-          <p className="text-xs md:text-sm text-muted-foreground">
-            {columns.length} etapa{columns.length !== 1 && "s"} · {totalTasks}{" "}
-            tarefa{totalTasks !== 1 && "s"} · {completedTasks} concluída
-            {completedTasks !== 1 && "s"} ({completionPercentage}%)
-          </p>
+          <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Columns3 className="h-3 w-3" />
+              {columns.length} etapa{columns.length !== 1 && "s"}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <ClipboardList className="h-3 w-3" />
+              {totalTasks} tarefa{totalTasks !== 1 && "s"}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3" />
+              {completedTasks} concluída
+              {completedTasks !== 1 && "s"}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Gauge className="h-3 w-3" />
+              {completionPercentage}% de avanço
+            </span>
+          </div>
 
           {/* barra de progresso */}
           <div className="mt-1 h-1.5 w-100 md:w-100 rounded-full bg-muted overflow-hidden">
@@ -1038,158 +1111,328 @@ const Example = () => {
           data={features}
           onDataChange={handleKanbanDataChange}
         >
-          {(column: KanbanColumn) => (
-            <KanbanBoard
-              id={column.id}
-              key={column.id}
-              className="min-w-[400px]"
-            >
-              <KanbanHeader>
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: column.color ?? "#6B7280" }}
-                  />
-                  <span>{column.name}</span>
-                </div>
-              </KanbanHeader>
+          {(column: KanbanColumn) => {
+            const stats = columnStats[column.id] ?? { total: 0, done: 0 };
 
-              <KanbanCards id={column.id}>
-                {(feature: Feature) => {
-                  const status = getStatusConfig(feature.status);
-                  const currentTypeId = getFeatureTypeId(feature);
-                  const currentTypeLabel = getFeatureTypeLabel(
-                    feature,
-                    tarefaTypes,
-                  );
+            return (
+              <KanbanBoard
+                id={column.id}
+                key={column.id}
+                className="min-w-[400px] "
+              >
+                <KanbanHeader>
+                  <div className="flex items-center justify-between gap-2 w-full">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: column.color ?? "#6B7280" }}
+                      />
+                      <span className="font-medium text-sm">{column.name}</span>
+                    </div>
 
-                  return (
-                    <KanbanCard
-                      column={column.id}
-                      id={feature.id}
-                      key={feature.id}
-                      name={feature.name}
-                    >
-                      <div className="flex flex-col gap-3">
-                        {/* Título + dono */}
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex flex-col gap-1">
-                            <p className="m-0 font-semibold text-sm md:text-[15px] leading-snug">
-                              {feature.name}
-                            </p>
-                            {feature.description && (
-                              <p className="m-0 text-xs md:text-[13px] text-muted-foreground line-clamp-2">
-                                {feature.description}
-                              </p>
-                            )}
+                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5">
+                        <ClipboardList className="h-3 w-3" />
+                        {stats.total} tarefa
+                        {stats.total === 1 ? "" : "s"}
+                      </span>
+                      {stats.done > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-500 px-2 py-0.5">
+                          <CheckCircle2 className="h-3 w-3" />
+                          {stats.done} concluída
+                          {stats.done === 1 ? "" : "s"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </KanbanHeader>
+
+                <KanbanCards id={column.id}>
+                  {(feature: Feature) => {
+                    const status = getStatusConfig(feature.status);
+                    const currentTypeId = getFeatureTypeId(feature);
+                    const currentTypeLabel = getFeatureTypeLabel(
+                      feature,
+                      tarefaTypes,
+                    );
+
+                    const featureMembers = (feature.userIds ?? [])
+                      .map((id) => membersById[id])
+                      .filter((m): m is ApiMember => !!m);
+
+                    const mainMember = featureMembers[0];
+                    const extraCount =
+                      featureMembers.length > 1 ? featureMembers.length - 1 : 0;
+
+                    const initials = (nameOrUsername: string) => {
+                      const trimmed = nameOrUsername.trim();
+                      if (!trimmed) return "US";
+                      const parts = trimmed.split(" ");
+                      if (parts.length === 1)
+                        return parts[0].slice(0, 2).toUpperCase();
+                      return (
+                        (parts[0][0] ?? "").toUpperCase() +
+                        (parts[1][0] ?? "").toUpperCase()
+                      );
+                    };
+
+                    const goToDetails = () => {
+                      if (!handle) return;
+                      navigate(`/app/${handle}/tasks/${feature.id}`);
+                    };
+
+                    return (
+                      <KanbanCard
+                        column={column.id}
+                        id={feature.id}
+                        key={feature.id}
+                        name={feature.name}
+                      >
+                        <div className="flex flex-col gap-3">
+                          {/* Título + donos + ações */}
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex flex-col gap-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="m-0 font-semibold text-sm md:text-[15px] leading-snug truncate">
+                                  {feature.name}
+                                </p>
+                                {feature.hash && (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                                    <Hash className="h-3 w-3" />
+                                    {feature.hash}
+                                  </span>
+                                )}
+                              </div>
+                              {feature.description && (
+                                <p className="m-0 text-xs md:text-[13px] text-muted-foreground line-clamp-2">
+                                  {feature.description}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex items-start gap-2">
+                              {/* Avatares dos responsáveis */}
+                              {featureMembers.length > 0 && (
+                                <HoverCard>
+                                  <HoverCardTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className="flex -space-x-2 items-center"
+                                    >
+                                      {featureMembers.slice(0, 3).map((m) => (
+                                        <Avatar
+                                          key={memberId(m)}
+                                          className="h-6 w-6 border border-border bg-background"
+                                        >
+                                          <AvatarImage src={m.avatarUrl} />
+                                          <AvatarFallback className="text-[10px] font-medium">
+                                            {initials(
+                                              m.name || m.username || "US",
+                                            )}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      ))}
+                                      {extraCount > 0 && (
+                                        <div className="h-6 w-6 rounded-full bg-muted border border-border flex items-center justify-center text-[10px] text-muted-foreground">
+                                          +{extraCount}
+                                        </div>
+                                      )}
+                                    </button>
+                                  </HoverCardTrigger>
+                                  <HoverCardContent className="w-56">
+                                    <p className="text-xs text-muted-foreground mb-2">
+                                      Responsáveis pela tarefa:
+                                    </p>
+                                    <div className="space-y-1 text-xs">
+                                      {featureMembers.map((m) => (
+                                        <div
+                                          key={memberId(m)}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <Avatar className="h-6 w-6 border border-border bg-background">
+                                            <AvatarImage src={m.avatarUrl} />
+                                            <AvatarFallback className="text-[10px] font-medium">
+                                              {initials(
+                                                m.name || m.username || "US",
+                                              )}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <div className="flex flex-col min-w-0">
+                                            <span className="font-medium truncate">
+                                              {m.name || m.username}
+                                            </span>
+                                            {m.username && m.name && (
+                                              <span className="text-[11px] text-muted-foreground truncate">
+                                                @{m.username}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </HoverCardContent>
+                                </HoverCard>
+                              )}
+
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="p-1 rounded-md hover:bg-accent"
+                                    // ESSENCIAL: impede que o Kanban capture o drag nesse botão
+                                    onPointerDownCapture={(e) =>
+                                      e.stopPropagation()
+                                    }
+                                    onMouseDownCapture={(e) =>
+                                      e.stopPropagation()
+                                    }
+                                    onDragStart={(e) => e.preventDefault()}
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </button>
+                                </PopoverTrigger>
+
+                                <PopoverContent
+                                  side="bottom"
+                                  align="end"
+                                  className="p-0 w-44"
+                                  onPointerDownCapture={(e) =>
+                                    e.stopPropagation()
+                                  }
+                                  onMouseDownCapture={(e) =>
+                                    e.stopPropagation()
+                                  }
+                                >
+                                  <Command>
+                                    <CommandList>
+                                      <CommandGroup>
+                                        <CommandItem
+                                          className="flex items-center gap-2 text-xs py-2"
+                                          onSelect={() => {
+                                            goToDetails(feature.id);
+                                          }}
+                                        >
+                                          <Eye className="h-3.5 w-3.5" />
+                                          <span>Mostrar detalhes</span>
+                                        </CommandItem>
+
+                                        <CommandItem
+                                          className="flex items-center gap-2 text-xs py-2"
+                                          onSelect={() => {
+                                            // TODO: abrir sheet/modal de edição
+                                          }}
+                                        >
+                                          <Pencil className="h-3.5 w-3.5" />
+                                          <span>Editar tarefa</span>
+                                        </CommandItem>
+
+                                        <CommandItem
+                                          className="flex items-center gap-2 text-xs py-2 text-destructive"
+                                          onSelect={() => {
+                                            // TODO: lógica de excluir tarefa
+                                          }}
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                          <span>Excluir tarefa</span>
+                                        </CommandItem>
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
                           </div>
 
-                          <DropdownMenu>
-                            <DropdownMenuTrigger className="p-1 rounded-md hover:bg-accent">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </DropdownMenuTrigger>
+                          {/* Tipo + status (com dropdown) */}
+                          <div className="flex flex-wrap items-center gap-2 text-[11px] md:text-xs">
+                            {/* Tipo */}
+                            <Select
+                              value={currentTypeId || undefined}
+                              onValueChange={(value) =>
+                                handleTypeChange(feature.id, value)
+                              }
+                              disabled={loadingTypes || !tarefaTypes.length}
+                            >
+                              <SelectTrigger className="px-2 !h-7 rounded-lg border bg-violet-100 text-violet-700 dark:bg-violet-900/60 dark:text-violet-200 text-[10px] md:text-[11px] font-medium w-auto">
+                                <SelectValue
+                                  placeholder={
+                                    loadingTypes
+                                      ? "Carregando tipos..."
+                                      : "Tipo não definido"
+                                  }
+                                >
+                                  <span className="inline-flex items-center gap-1">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-violet-500 dark:bg-violet-300" />
+                                    {currentTypeLabel || "Definir tipo"}
+                                  </span>
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {tarefaTypes.map((t) => (
+                                  <SelectItem key={t.value} value={t.value}>
+                                    {t.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
 
-                            <DropdownMenuContent align="end" className="w-40">
-                              <DropdownMenuItem>
-                                Mostrar detalhes
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>Editar tarefa</DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600">
-                                Excluir tarefa
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-
-                          {feature.owner && (
-                            <div className="flex flex-col items-end gap-1">
-                              <Avatar className="h-6 w-6 shrink-0 border border-border/60">
-                                <AvatarImage src={feature.owner.image} />
-                                <AvatarFallback className="text-[10px] font-medium">
-                                  {feature.owner.name
-                                    ?.slice(0, 2)
-                                    .toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="max-w-[90px] truncate text-[10px] text-muted-foreground">
-                                {feature.owner.name}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Tipo + status (com dropdown) */}
-                        <div className="flex flex-wrap items-center gap-2 text-[11px] md:text-xs">
-                          {/* Tipo */}
-                          <Select
-                            value={currentTypeId || undefined}
-                            onValueChange={(value) =>
-                              handleTypeChange(feature.id, value)
-                            }
-                            disabled={loadingTypes || !tarefaTypes.length}
-                          >
-                            <SelectTrigger className="px-2 !h-7 rounded-lg border bg-violet-100 text-violet-700 dark:bg-violet-900/60 dark:text-violet-200 text-[10px] md:text-[11px] font-medium w-auto">
-                              <SelectValue
-                                placeholder={
-                                  loadingTypes
-                                    ? "Carregando tipos..."
-                                    : "Tipo não definido"
-                                }
-                              >
-                                <span className="inline-flex items-center gap-1">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-violet-500 dark:bg-violet-300" />
-                                  {currentTypeLabel || "Definir tipo"}
-                                </span>
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              {tarefaTypes.map((t) => (
-                                <SelectItem key={t.value} value={t.value}>
-                                  {t.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-
-                          {/* Status */}
-                          <Select
-                            value={feature.status}
-                            onValueChange={(value) =>
-                              handleStatusChange(
-                                feature.id,
-                                value as Feature["status"],
-                              )
-                            }
-                          >
-                            <SelectTrigger
-                              className={
-                                "px-2 rounded-lg !h-7 border text-[10px] md:text-[11px] font-medium w-auto " +
-                                status.className
+                            {/* Status */}
+                            <Select
+                              value={feature.status}
+                              onValueChange={(value) =>
+                                handleStatusChange(
+                                  feature.id,
+                                  value as Feature["status"],
+                                )
                               }
                             >
-                              <SelectValue>
-                                <span className="inline-flex items-center gap-1">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-current/80" />
-                                  {status.label}
+                              <SelectTrigger
+                                className={
+                                  "px-2 rounded-lg !h-7 border text-[10px] md:text-[11px] font-medium w-auto " +
+                                  status.className
+                                }
+                              >
+                                <SelectValue>
+                                  <span className="inline-flex items-center gap-1">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-current/80" />
+                                    {status.label}
+                                  </span>
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {statusOptions.map((opt) => (
+                                  <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Linha de meta info */}
+                          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                            <div className="inline-flex items-center gap-1">
+                              <ClipboardList className="h-3 w-3" />
+                              <span>ID: {feature.id.slice(-6)}</span>
+                            </div>
+                            {featureMembers.length > 0 && (
+                              <div className="inline-flex items-center gap-1">
+                                <Users className="h-3 w-3" />
+                                <span>
+                                  {featureMembers.length} responsável
+                                  {featureMembers.length === 1 ? "" : "is"}
                                 </span>
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              {statusOptions.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </KanbanCard>
-                  );
-                }}
-              </KanbanCards>
-            </KanbanBoard>
-          )}
+                      </KanbanCard>
+                    );
+                  }}
+                </KanbanCards>
+              </KanbanBoard>
+            );
+          }}
         </KanbanProvider>
       </div>
     </div>
